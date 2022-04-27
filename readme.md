@@ -6,7 +6,7 @@
 * Before the script is run, there should be no EC2 instances running and afterward the script should output the address of your working web application.
 * The single command from the user can (and likely will) call a longer shell script, or other configuration management code.
 * The web application can be any common framework (Django, Rails, Symfony, etc.), but not the default Nginx or Apache setup.
-* Your credentials are attached (including the assigned region). The credentials do not have access to EKS, ECS, S3, ELB, ASG, or Route53.
+* Your credentials are attached (including the assigned region). The credentials do not have access to EKS, ECS, ELB, ASG, or Route53.
 * If needed, you can manually create pre-requisites such as SSH key pairs or other prerequisites.
 
 ## Evaluation Criteria
