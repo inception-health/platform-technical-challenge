@@ -2,12 +2,11 @@
 
 ## Assignment
 
-* Using the tools and language of your choice, write code that creates an EC2 instance running a basic web application given a single command from the user.
-* Before the script is run, there should be no EC2 instances running and afterward the script should output the address of your working web application.
+* Using the tools and language of your choice, write code that creates a lambda function running a basic web application given a single command from the user.
+* The script should output the address of your working web application. We expect to hit the service via http not invoke the lambda directly.
 * The single command from the user can (and likely will) call a longer shell script, or other configuration management code.
-* The web application can be any common framework (Django, Rails, Symfony, etc.), but not the default Nginx or Apache setup.
-* Your credentials are attached (including the assigned region). The credentials do not have access to EKS, ECS, ELB, ASG, or Route53.
-* If needed, you can manually create pre-requisites such as SSH key pairs or other prerequisites.
+* The web application can be any common framework (Django, Rails, Symfony, etc.).
+* Your credentials are attached (including the assigned region). You have admin access to the account. Have fun.
 
 ## Evaluation Criteria
 
