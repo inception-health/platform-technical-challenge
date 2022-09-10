@@ -76,7 +76,7 @@ Check in a patient
 cd app/
 docker build -t lambda-handler -f Dockerfile.lambda .
 docker run --rm -d -p 8080:8080 \
-  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
+  -e DYNAMO_TABLE_NAME=YOUR_TABLE_NAME \
   -e REGION=us-east-1 \
   -e AWS_PROFILE=sandbox-jake \
   -v $HOME/.aws/:/root/.aws/:ro \
@@ -90,7 +90,7 @@ List the latest patient checkin times.
 cd app/
 docker build -t lambda-handler -f Dockerfile.lambda .
 docker run --rm -d -p 8081:8080 \
-  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
+  -e DYNAMO_TABLE_NAME=YOUR_TABLE_NAME \
   -e REGION=us-east-1 \
   -e AWS_PROFILE=sandbox-jake \
   -v $HOME/.aws/:/root/.aws/:ro \
@@ -105,7 +105,7 @@ curl -X POST http://localhost:8081/2015-03-31/functions/function/invocations -H 
 cd app/
 docker build -t express-app -f Dockerfile.express .
 docker run --rm -d -p 3000:3000 \
-  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
+  -e DYNAMO_TABLE_NAME=YOUR_TABLE_NAME \
   -e REGION=us-east-1 \
   -e AWS_PROFILE=sandbox-jake \
   -v $HOME/.aws/:/root/.aws/:ro \
@@ -122,7 +122,9 @@ curl http://localhost:3000/
 ```
 cd app/
 npm run build-express
-DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N REGION=us-east-1 node ./dist/express.js
+DYNAMO_TABLE_NAME=YOUR_TABLE_NAME \
+  REGION=us-east-1 \
+  node ./dist/express.js
 ```
 
 
