@@ -78,7 +78,7 @@ docker build -t lambda-handler -f Dockerfile.lambda .
 docker run --rm -d -p 8080:8080 \
   -e DYNAMO_TABLE_NAME=YOUR_TABLE_NAME \
   -e REGION=us-east-1 \
-  -e AWS_PROFILE=sandbox-jake \
+  -e AWS_PROFILE=$AWS_PROFILE \
   -v $HOME/.aws/:/root/.aws/:ro \
   lambda-handler index.checkin
 curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"'
@@ -92,7 +92,7 @@ docker build -t lambda-handler -f Dockerfile.lambda .
 docker run --rm -d -p 8081:8080 \
   -e DYNAMO_TABLE_NAME=YOUR_TABLE_NAME \
   -e REGION=us-east-1 \
-  -e AWS_PROFILE=sandbox-jake \
+  -e AWS_PROFILE=$AWS_PROFILE \
   -v $HOME/.aws/:/root/.aws/:ro \
   lambda-handler index.backend
 curl -X POST http://localhost:8081/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"'
@@ -107,7 +107,7 @@ docker build -t express-app -f Dockerfile.express .
 docker run --rm -d -p 3000:3000 \
   -e DYNAMO_TABLE_NAME=YOUR_TABLE_NAME \
   -e REGION=us-east-1 \
-  -e AWS_PROFILE=sandbox-jake \
+  -e AWS_PROFILE=$AWS_PROFILE \
   -v $HOME/.aws/:/root/.aws/:ro \
   express-app
 
