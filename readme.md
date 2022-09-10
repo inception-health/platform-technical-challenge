@@ -19,7 +19,8 @@
 * You are being evaluated based on:
   * Quality of your code and configuration
   * Clarity of your written communication and documentation
-  * Understanding of how your code works in our review session.
+  * Communicating how your code works in our review session.
+  * Communicating how the app runs in our review session.
   * Project presentation.
 
 ## What's Included?
@@ -28,48 +29,61 @@
 
 Your AWS credentials give you admin access to a sandbox account. You may use any resources you find appropriate.
 
-You have access to an existing hosted zone in route53. The zone id is `Z07252961CXXYMJEGGB16` and the zone name is `jake-sandbox.ihengine.com`. Please do not buy and/or register a new domain.
+You have access to an existing hosted zone in route53. The zone id is `Z07252961CXXYMJEGGB16` and the zone name is `jake-sandbox.ihengine.com`. Please do not buy and/or register a new domain or create a new hosted zone.
 
 ### Application
 
-There is an application in the `app/` folder in the root of this repository. It exports two functions, `checkin` and `backend` from `index.ts`. `checkin` creates a record in dynamodb that represents a patient checking in. `backend` reads the records in dynamodb and returns a JSON encoded message representing the latest checkin time for the known patients.
+There is a typescript code base in the `app/` folder in the root of this repository. It exports two functions, `checkin` and `backend` from `index.ts`. `checkin` creates a record in dynamodb that represents a patient checking in. `backend` reads the records in dynamodb and returns a JSON encoded message representing the latest checkin time for the known patients.
 
-These functions can be invoked directly from lambda but there is also an express implementation in `express.ts`.
+These functions can be invoked directly from lambda or using the express implementation in `express.ts`.
 
-There are two Dockerfiles. First, `Dockerfile.lambda` is for use with lambdas. Second is `Dockerfile.express` which will startup an express server on port 3000 or the port specified by the environment variable `PORT`.
+There are two Dockerfiles provided for your convenience. First, `Dockerfile.lambda` is for use with lambdas. Second is `Dockerfile.express` which will startup an express server on port 3000.
+
 
 #### Using the applications
 
-You may want to invoke these functions from a web server directly or you may want to set these functions up as lambda handlers. There are some included dockerfiles to make things easier but you don't have to use them.
+The functions are fairly simple and written in typescript. Please feel free to read the code to help make sense of things.
 
-##### Lambda Handlers
+##### AWS Credentials
 
-You can build and run the lambda handlers locally using
+We use the aws-sdk in the application and so it expects credentials to be made available using one of the standard mechanisms provided by AWS.
+
+`checkin` will need write access to the dynamodb table.
+
+`backend` will need read access to the dynamodb table. It will also need to be able to describe the table.
+
+##### Environment variables
+
+Both functions need the same environment variables no matter how you run the application.
+
+* `DYNAMO_TABLE_NAME` - Required. The name of the dynamodb table to read from or write to.
+* `REGION` - Optional. The aws region in which the dynamodb table exists. Can be omitted if your chosen credentials provider will handle it for you.
+
+##### Running Locally
+
+**Lambda Handlers** 
 
 ```
 cd app/
 docker build -t lambda-handler -f Dockerfile.lambda .
 docker run --rm -d -p 8080:8080 \
+  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
   -e REGION=us-east-1 \
   -e AWS_PROFILE=sandbox-jake \
-  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
   -v $HOME/.aws/:/root/.aws/:ro \
   lambda-handler index.backend
 curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"' | python3 -m json.tool
 ```
 
-##### Express Webserver
-
-You can build and run the express webserver locally using
+**Express Webserver**
 
 ```
 cd app/
 docker build -t express-app -f Dockerfile.express .
 docker run --rm -d -p 3000:3000 \
+  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
   -e REGION=us-east-1 \
   -e AWS_PROFILE=sandbox-jake \
-  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
-  -e PORT=3000 \
   -v $HOME/.aws/:/root/.aws/:ro \
   express-app
 ```

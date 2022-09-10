@@ -4,7 +4,7 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
 import * as process from "process";
 
-const TABLE_NAME = process.env.DYNAMO_TABLE_NAME
+const TABLE_NAME = process.env.DYNAMO_TABLE_NAME || "";
 const REGION = process.env.REGION;
 
 const ddbClient = new DynamoDBClient({ region: REGION });
@@ -31,26 +31,24 @@ export const backend = async (): Promise<APIGatewayProxyResult> => {
   try {
     await describeTable(TABLE_NAME);
   } catch (e) {
-    console.log("!!!!", e);
-    return response(500, {error: `Failed to describe Dynamodb table. Looked for '${TABLE_NAME}'.`, details: e})
+    return response(500, {error: `Error trying to describe Dynamodb table '${TABLE_NAME}'.`, details: e})
   }
 
   try {
-    const latestCheckins = await getLastestCheckins();
+    const latestCheckins = await getLastestCheckins(TABLE_NAME);
     return response(200, {message: "checkins", latestCheckins});
   }
   catch (e) {
-    console.log("exception getting checkin data", e);
     if (e.name === "AccessDeniedException") {
-      return response(500, {error: `Access Denied trying to read from '${TABLE_NAME}'.`, details: e});
+      return response(500, {error: `Access Denied trying to read from Dynamodb table '${TABLE_NAME}'.`, details: e});
     }
-    return response(500, {error: `Unknown error trying to read from '${TABLE_NAME}'.`, details: e});
+    return response(500, {error: `Unknown error trying to read from Dynamodb table '${TABLE_NAME}'.`, details: e});
   }
 };
 
-async function getCheckin(id: string): Promise<Record<string, AttributeValue>> {
+async function getCheckin(tableName: string, id: string): Promise<Record<string, AttributeValue>> {
   const command = new GetItemCommand({
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Key: {"id": { S: id }},
   });
   const output = await ddbClient.send(command);
@@ -58,11 +56,11 @@ async function getCheckin(id: string): Promise<Record<string, AttributeValue>> {
   return item;
 }
 
-async function getLastestCheckins(): Promise<Record<string, any>> {
+async function getLastestCheckins(tableName: string): Promise<Record<string, any>> {
   const latestCheckins = {};
   for (const key in patientIds) {
     const id = patientIds[key]
-    const data = await getCheckin(id);
+    const data = await getCheckin(tableName, id);
     if (! data) {
       latestCheckins[id] = "Never"
     } else {
@@ -89,7 +87,7 @@ function response(code, data) {
   }
 }
 
-function getRandomElement(items): string {
-  const i = Math.floor(Math.random() * items.length);
-  return items[i];
+function getRandomElement(elements: string[]): string {
+  const i = Math.floor(Math.random() * elements.length);
+  return elements[i];
 }
