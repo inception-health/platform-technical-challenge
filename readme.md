@@ -33,18 +33,13 @@ You have access to an existing hosted zone in route53. The zone id is `Z07252961
 
 ### Application
 
-There is a typescript code base in the `app/` folder in the root of this repository. It exports two functions, `checkin` and `backend` from `index.ts`. `checkin` creates a record in dynamodb that represents a patient checking in. `backend` reads the records in dynamodb and returns a JSON encoded message representing the latest checkin time for the known patients.
+There is a typescript code base in the `app/` folder in the root of this repository. It exports two functions, `checkin` and `backend` from `index.ts`. `checkin` creates a record in dynamodb that represents a patient checking in. `backend` reads the records in dynamodb and returns a JSON encoded message representing the latest checkin time for the known patients. The functions are fairly short and written in typescript. Please feel free to read the code to get a sense of things.
 
 These functions can be invoked directly from lambda or using the express implementation in `express.ts`.
 
 There are two Dockerfiles provided for your convenience. First, `Dockerfile.lambda` is for use with lambdas. Second is `Dockerfile.express` which will startup an express server on port 3000.
 
-
-#### Using the applications
-
-The functions are fairly simple and written in typescript. Please feel free to read the code to help make sense of things.
-
-##### AWS Credentials
+#### AWS Credentials
 
 We use the aws-sdk in the application and so it expects credentials to be made available using one of the standard mechanisms provided by AWS.
 
@@ -52,14 +47,14 @@ We use the aws-sdk in the application and so it expects credentials to be made a
 
 `backend` will need read access to the dynamodb table. It will also need to be able to describe the table.
 
-##### Environment variables
+#### Environment variables
 
 Both functions need the same environment variables no matter how you run the application.
 
 * `DYNAMO_TABLE_NAME` - Required. The name of the dynamodb table to read from or write to.
 * `REGION` - Optional. The aws region in which the dynamodb table exists. Can be omitted if your chosen credentials provider will handle it for you.
 
-##### Running Locally
+#### Running Locally
 
 **Lambda Handlers** 
 
