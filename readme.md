@@ -39,7 +39,7 @@ These functions can be invoked directly from lambda or using the express impleme
 
 There are two Dockerfiles provided for your convenience. First, `Dockerfile.lambda` is for use with lambdas. Second is `Dockerfile.express` which will startup an express server on port 3000.
 
-### Running the application
+### Runtime requirements
 
 #### AWS Credentials
 
@@ -56,9 +56,9 @@ Both functions need the same environment variables no matter how you run the app
 * `DYNAMO_TABLE_NAME` - Required. The name of the dynamodb table to read from or write to.
 * `REGION` - Optional. The aws region in which the dynamodb table exists. Can be omitted if your chosen credentials provider will handle it for you.
 
-#### Running Locally
+### Running Locally
 
-**Lambda Handlers** 
+#### Lambda Handlers
 
 ```
 cd app/
@@ -72,7 +72,7 @@ docker run --rm -d -p 8080:8080 \
 curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"' | python3 -m json.tool
 ```
 
-**Express Webserver**
+#### Express Webserver
 
 ```
 cd app/
