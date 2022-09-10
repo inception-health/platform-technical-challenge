@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.165.0",
+    "@aws-sdk/lib-dynamodb": "^3.168.0",
     "@skyra/star-wars-api": "^2.0.33",
     "apollo-boost": "^0.4.9",
     "cross-fetch": "^3.1.5",

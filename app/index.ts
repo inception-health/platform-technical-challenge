@@ -1,55 +1,84 @@
 import * as process from "process";
 import { Context, APIGatewayProxyResult, APIGatewayEvent } from "aws-lambda";
-import { DynamoDBClient, DescribeTableCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, DescribeTableCommand, PutItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-import ApolloClient from 'apollo-boost';
-import fetch from 'cross-fetch';
-import gql from 'graphql-tag';
-import * as starwars from "@skyra/star-wars-api";
-import type { Query, QueryGetFuzzyPersonArgs, QueryGetPersonArgs } from "@skyra/star-wars-api";
+const TABLE_NAME = process.env.DYNAMO_TABLE_NAME
+const REGION = process.env.REGION;
 
-type StarWarsGraphqlApiResponse<K extends keyof Omit<Query, '__typename'>> = Record<K, Omit<Query[K], '__typename'>>;
+const marshallOptions = {
+  // Whether to automatically convert empty strings, blobs, and sets to `null`.
+  convertEmptyValues: false, // false, by default.
+  // Whether to remove undefined values while marshalling.
+  removeUndefinedValues: false, // false, by default.
+  // Whether to convert typeof object to map attribute.
+  convertClassInstanceToMap: false, // false, by default.
+};
+
+const unmarshallOptions = {
+  // Whether to return numbers as a string instead of converting them to native JavaScript numbers.
+  wrapNumbers: false, // false, by default.
+};
+
+const translateConfig = { marshallOptions, unmarshallOptions };
+
+// Create the DynamoDB document client.
+const ddbClient = new DynamoDBClient({ region: REGION });
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient, translateConfig);
+
+
+export const emitter = async (event: any): Promise<void> => {
+  const out = {
+    "time": { S: Date.now().toString()},
+    "id": { S: "challenge-app"},
+  };
+  console.log("event out", out);
+  
+  const cmd = new PutItemCommand({
+    TableName: TABLE_NAME,
+    Item: out,
+  });
+  
+  const res = await ddbDocClient.send(cmd);
+  console.log("res", res)
+  return;
+}
 
 export const handler = async (
   _event: APIGatewayEvent,
   _context: Context
 ): Promise<APIGatewayProxyResult> => {
 
-  const REGION = process.env.REGION;
-  const TABLE_NAME = process.env.DYNAMO_TABLE_NAME
-  const STARWARS_API_URL = process.env.STARWARS_API_URL
-
-  const apolloClient = new ApolloClient({
-    uri: STARWARS_API_URL,
-    fetch
-  });
-
+  const lastCheckin = await getCheckin("challenge-app")
   const checks = {
-    "table": false,
-    "starwars": false,
+    "table": await checkTable(),
+    "data": !! lastCheckin,
   };
 
-  const client = new DynamoDBClient({ region: REGION });
+  return successResponse({message: "status", checks, lastCheckin});
+};
+
+async function getCheckin(id: string) {
+  const command = new GetItemCommand({
+    TableName: TABLE_NAME,
+    Key: {"id": { S: id }},
+  });
+  const response = await ddbClient.send(command);
+  const item = response.Item;
+  return item;
+}
+
+async function checkTable() {
   const command = new DescribeTableCommand({
     TableName: TABLE_NAME,
   });
-  const response = await client.send(command);
+  const response = await ddbClient.send(command);
   const table = response.Table;
   if (! table) {
-    // return errorResponse({error: "dynamodb table not found"})
     console.log("failed the table check")
   }
-  checks["table"] = !! table
-
-  // const people = []
-  // const people = await getPeople(apolloClient);
-  // if(people.length === 0) {
-  //   console.log("failed the starwars check")
-  // }
-  // checks["starwars"] = (people.length > 0)
-
-  return successResponse({message: "status", checks, table, people});
-};
+  return !! table
+}
 
 function errorResponse(data) {
   return response(500, data)
@@ -65,25 +94,4 @@ function response(code, data) {
     isBase64Encoded: false,
     body: JSON.stringify(data)
   }
-}
-
-async function getPeople(apolloClient: ApolloClient): Promise<any[]> {
-  const getPersonFuzzy = gql`
-	query getPerson($person: String!) {
-		getFuzzyPerson(person: $person, take: 10) {
-			name
-			birthYear
-			eyeColors
-			gender
-		}
-	}
-`;
-  const {
-    data: { getPersonFuzzy: peopleData }
-  } = await apolloClient.query<StarWarsGraphqlApiResponse<'getFuzzyPerson'>, QueryGetFuzzyPersonArgs>({
-    query: getPersonFuzzy,
-    variables: { person: 'luke' }
-  });
-
-  return peopleData;
 }
