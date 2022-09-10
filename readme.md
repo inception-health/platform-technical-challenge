@@ -39,6 +39,8 @@ These functions can be invoked directly from lambda or using the express impleme
 
 There are two Dockerfiles provided for your convenience. First, `Dockerfile.lambda` is for use with lambdas. Second is `Dockerfile.express` which will startup an express server on port 3000.
 
+### Running the application
+
 #### AWS Credentials
 
 We use the aws-sdk in the application and so it expects credentials to be made available using one of the standard mechanisms provided by AWS.
