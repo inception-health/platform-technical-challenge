@@ -1,9 +1,9 @@
 # Inception Health Technical Challenge
 
-
 ## Assignment
 
 * Using the tools and language of your choice, write code that deploys the two applications in `app/` using a single command.
+* We request that you not use ec2 directly for your solution. An acceptable usage example is a fargate cluster in which ec2 instances are managed by aws.
 * The backend service should be accessiable via https over the public internet.
 * The checkin event handler should be triggered regularly.
 * You should not need to make changes to the application code.
@@ -23,6 +23,12 @@
   * Project presentation.
 
 ## What's Included?
+
+### AWS Credentials
+
+Your AWS credentials give you admin access to a sandbox account. You may use any resources you find appropriate.
+
+You have access to an existing hosted zone in route53. The zone id is `Z07252961CXXYMJEGGB16` and the zone name is `jake-sandbox.ihengine.com`. Please do not buy and/or register a new domain.
 
 ### Application
 
@@ -74,12 +80,6 @@ The first is `checkin` which "checks in" a random patient whenever it is invoked
 The second is `backend` which generates an http response carrying JSON encoded data representing the last checkin time for each patient. It requires read and describe access to the same dynamodb table used by `checkin`. The tablename should be defined in the environment variable `DYNAMO_TABLE_NAME`. When invoking this lambda handler be sure to set the handler to `index.backend`. In the express implementation you cand a `GET` request to `/`.
 
 You should not need to modify this code. You may use either the lambda or express based version of the app or some combination of the two.
-
-### AWS
-
-Your AWS credentials give you admin access to a sandbox account. You may use any resources you find appropriate. We prefer that you not use EC2 for your solution.
-
-You have access to an existing hosted zone in route53. The zone id is `Z07252961CXXYMJEGGB16` and the zone name is `jake-sandbox.ihengine.com`. Please do not buy and register a new domain.
 
 ## Reach out if you get stuck
 Please reach out with any questions or clarifications. jake.gaylor@froedtert.com and nick.harris@froedtert.com are here to help.
