@@ -33,11 +33,15 @@ You have access to an existing hosted zone in route53. The zone id is `Z07252961
 
 ### Application
 
-There is a typescript code base in the `app/` folder in the root of this repository. It exports two functions, `checkin` and `backend` from `index.ts`. `checkin` creates a record in dynamodb that represents a patient checking in. `backend` reads the records in dynamodb and returns a JSON encoded message representing the latest checkin time for the known patients. The functions are fairly short and written in typescript. Please feel free to read the code to get a sense of things.
+There is a typescript code base in the `app/` folder in the root of this repository. It exports two functions, `checkin` and `backend` from `index.ts`. `checkin` creates a record in dynamodb that represents a patient checking in. `backend` reads the records in dynamodb and returns a JSON encoded message representing the latest checkin time for the known patients. 
 
-These functions can be invoked directly from lambda or using the express implementation in `express.ts`.
+The functions are fairly short and written in typescript. Please feel free to read the code to get a sense of things.
+
+The functions can be invoked directly from lambda or using the express implementation in `express.ts`. 
 
 There are two Dockerfiles provided for your convenience. First, `Dockerfile.lambda` is for use with lambdas. Second is `Dockerfile.express` which will startup an express server on port 3000.
+
+You should not need to modify this code. You may use either the lambda or express based version of the app or some combination of the two.
 
 ### Runtime requirements
 
@@ -56,11 +60,31 @@ Both functions need the same environment variables no matter how you run the app
 * `DYNAMO_TABLE_NAME` - Required. The name of the dynamodb table to read from or write to.
 * `REGION` - Optional. The aws region in which the dynamodb table exists. Can be omitted if your chosen credentials provider will handle it for you.
 
+#### Lambda handler name
+
+Make sure that you set the correct handler name for each lambda. If you are using the provided dockerfile you need to set `CMD` in docker to `index.checkin` or `index.backend` as appropriate.
+
 ### Running Locally
 
 You can run either the lambdas or the the express web server locally. This may be helpful for understanding how to execute the functions.
 
 #### Lambda Handlers (Requires Docker)
+
+Check in a patient
+
+```
+cd app/
+docker build -t lambda-handler -f Dockerfile.lambda .
+docker run --rm -d -p 8080:8080 \
+  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
+  -e REGION=us-east-1 \
+  -e AWS_PROFILE=sandbox-jake \
+  -v $HOME/.aws/:/root/.aws/:ro \
+  lambda-handler index.checkin
+curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"'
+```
+
+List the latest patient checkin times.
 
 ```
 cd app/
@@ -86,6 +110,12 @@ docker run --rm -d -p 3000:3000 \
   -e AWS_PROFILE=sandbox-jake \
   -v $HOME/.aws/:/root/.aws/:ro \
   express-app
+
+# check in a patient
+curl -X POST http://localhost:3000/checkin
+
+# List the latest patient checkin times.
+curl http://localhost:3000/
 ```
 
 **Without Docker**
@@ -95,12 +125,7 @@ npm run build-express
 DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N REGION=us-east-1 node ./dist/express.js
 ```
 
-# 
-The first is `checkin` which "checks in" a random patient whenever it is invoked. It requires write access to a dynamodb table. The tablename should be defined in the environment variable `DYNAMO_TABLE_NAME`. When invoking this lambda handler be sure to set the handler to `index.checkin`. In the express implementation you can send a `POST` request to `/checkin`.
 
-The second is `backend` which generates an http response carrying JSON encoded data representing the last checkin time for each patient. It requires read and describe access to the same dynamodb table used by `checkin`. The tablename should be defined in the environment variable `DYNAMO_TABLE_NAME`. When invoking this lambda handler be sure to set the handler to `index.backend`. In the express implementation you cand a `GET` request to `/`.
-
-You should not need to modify this code. You may use either the lambda or express based version of the app or some combination of the two.
 
 ## Closing Remarks
 
