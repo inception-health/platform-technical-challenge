@@ -122,9 +122,7 @@ curl http://localhost:3000/
 ```
 cd app/
 npm run build-express
-DYNAMO_TABLE_NAME=YOUR_TABLE_NAME \
-  REGION=us-east-1 \
-  node ./dist/express.js
+DYNAMO_TABLE_NAME=YOUR_TABLE_NAME REGION=us-east-1 node ./dist/express.js
 ```
 
 
