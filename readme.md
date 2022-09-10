@@ -7,7 +7,7 @@
 * The script should make the backend service available via https over the public internet.
 * The script should output the address of the `backend` api.
 * The script should cause the checkin event handler to be triggered regularly by an automated process.
-* Your credentials are attached (including the assigned region). You have admin access to the account. Have fun.
+* Your credentials are attached. You have admin access to the account. Please use region `us-east-1`.
 * We ask that you not use ec2 directly for your solution. However, something like a fargate cluster in which ec2 instances are managed by aws is okay.
 * You should not need to make changes to the existing application code. 
 
