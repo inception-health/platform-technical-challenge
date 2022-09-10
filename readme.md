@@ -81,7 +81,10 @@ The second is `backend` which generates an http response carrying JSON encoded d
 
 You should not need to modify this code. You may use either the lambda or express based version of the app or some combination of the two.
 
-## Reach out if you get stuck
-Please reach out with any questions or clarifications. jake.gaylor@froedtert.com and nick.harris@froedtert.com are here to help.
+## Final words
+
+There are no trick questions here. We want to see you deploy something and are excited to talk to you about how you did it.
+
+Please reach out with any questions or if something needs to be clarified. jake.gaylor@froedtert.com and nick.harris@froedtert.com are here to help.
 
 Good Luck!
