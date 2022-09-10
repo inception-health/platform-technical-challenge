@@ -58,7 +58,9 @@ Both functions need the same environment variables no matter how you run the app
 
 ### Running Locally
 
-#### Lambda Handlers
+You can run either the lambdas or the the express web server locally. This may be helpful for understanding how to execute the functions.
+
+#### Lambda Handlers (Requires Docker)
 
 ```
 cd app/
@@ -69,11 +71,12 @@ docker run --rm -d -p 8080:8080 \
   -e AWS_PROFILE=sandbox-jake \
   -v $HOME/.aws/:/root/.aws/:ro \
   lambda-handler index.backend
-curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"' | python3 -m json.tool
+curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"'
 ```
 
 #### Express Webserver
 
+**With Docker**
 ```
 cd app/
 docker build -t express-app -f Dockerfile.express .
@@ -83,6 +86,13 @@ docker run --rm -d -p 3000:3000 \
   -e AWS_PROFILE=sandbox-jake \
   -v $HOME/.aws/:/root/.aws/:ro \
   express-app
+```
+
+**Without Docker**
+```
+cd app/
+npm run build-express
+DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N REGION=us-east-1 node ./dist/express.js
 ```
 
 # 
