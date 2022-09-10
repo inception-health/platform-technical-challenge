@@ -3,10 +3,10 @@
 ## Assignment
 
 * Using the tools and language of your choice, write code that deploys the application provided in `app/` using a single command.
-* The backend service should be accessiable via https over the public internet.
-* The checkin event handler should be triggered regularly by an automated process.
 * The single command from the user can (and likely will) call a longer shell script, or other configuration management code.
+* The script should make the backend service available via https over the public internet.
 * The script should output the address of the `backend` api.
+* The script should cause the checkin event handler to be triggered regularly by an automated process.
 * Your credentials are attached (including the assigned region). You have admin access to the account. Have fun.
 * We ask that you not use ec2 directly for your solution. However, something like a fargate cluster in which ec2 instances are managed by aws is okay.
 * You should not need to make changes to the existing application code. 
