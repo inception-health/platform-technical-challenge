@@ -18,7 +18,7 @@ export class ExampleCdkStack extends cdk.Stack {
     const rootDomain = "jake-sandbox.ihengine.com";
     const backendSubdomain = "api.example-cdk.internal";
 
-    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, "hz", {
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, "challenge-hostedzone", {
       zoneName: rootDomain,
       hostedZoneId: "Z07252961CXXYMJEGGB16",
     });
@@ -29,7 +29,7 @@ export class ExampleCdkStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const backend = new lambda.DockerImageFunction(this, 'challenge-app', {
+    const backend = new lambda.DockerImageFunction(this, 'challenge-backend-handler', {
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../app')),
       environment: {
         "DYNAMO_TABLE_NAME": table.tableName,
@@ -41,7 +41,7 @@ export class ExampleCdkStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
-    const backendGateway = new apigateway.LambdaRestApi(this, 'challenge-apigateway', {
+    const backendGateway = new apigateway.LambdaRestApi(this, 'challenge-backend-apigateway', {
       handler: backend,
       domainName: {
         domainName: `${backendSubdomain}.${rootDomain}`,
@@ -59,26 +59,24 @@ export class ExampleCdkStack extends cdk.Stack {
 
     table.grantReadData(backend);
 
-    new cdk.CfnOutput(this, "api-gateway-url", {
+    new cdk.CfnOutput(this, "challenge-api-gateway-url", {
       value: `https://${backendSubdomain}.${rootDomain}`
     })
 
-    const eventEmitterHandler = new lambda.DockerImageFunction(this, 'challenge-event-emitter', {
+    const checkinHandler = new lambda.DockerImageFunction(this, 'challenge-checkin-handler', {
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../app'), {
-        cmd: ['index.emitter'],
+        cmd: ['index.checkin'],
       }),
       environment: {
         "DYNAMO_TABLE_NAME": table.tableName,
       },
       timeout: cdk.Duration.seconds(25),
     });
-    table.grantWriteData(eventEmitterHandler);
+    table.grantWriteData(checkinHandler);
 
-    const emitEventRule = new events.Rule(this, 'challenge-event-emitter-cron-rule', {
+    const runCheckinRule = new events.Rule(this, 'challenge-checkin-runner', {
       schedule: events.Schedule.rate(cdk.Duration.minutes(1)),
-      // eventBus: bus,
     });
-    emitEventRule.addTarget(new eventTargets.LambdaFunction(eventEmitterHandler))
-    
+    runCheckinRule.addTarget(new eventTargets.LambdaFunction(checkinHandler))
   }
 }
