@@ -89,13 +89,13 @@ List the latest patient checkin times.
 ```
 cd app/
 docker build -t lambda-handler -f Dockerfile.lambda .
-docker run --rm -d -p 8080:8080 \
+docker run --rm -d -p 8081:8080 \
   -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
   -e REGION=us-east-1 \
   -e AWS_PROFILE=sandbox-jake \
   -v $HOME/.aws/:/root/.aws/:ro \
   lambda-handler index.backend
-curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"'
+curl -X POST http://localhost:8081/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"'
 ```
 
 #### Express Webserver
