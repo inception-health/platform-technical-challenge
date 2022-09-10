@@ -1,7 +1,8 @@
-import * as process from "process";
 import { APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDBClient, DescribeTableCommand, PutItemCommand, GetItemCommand, AttributeValue } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+
+import * as process from "process";
 
 const TABLE_NAME = process.env.DYNAMO_TABLE_NAME
 const REGION = process.env.REGION;
@@ -10,7 +11,7 @@ const ddbClient = new DynamoDBClient({ region: REGION });
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
 const numberOfPatients = 10;
-const patientIds = [...Array(numberOfPatients).keys()].map((i) => i + 1).map((i) => `patient-${i}`);
+const patientIds = [...Array(numberOfPatients).keys()].map((i) => `patient-${i+1}`);
 
 export const checkin = async (): Promise<void> => {
   const patientId = getRandomElement(patientIds);
@@ -34,8 +35,8 @@ export const backend = async (): Promise<APIGatewayProxyResult> => {
   }
 
   try {
-    const lastCheckins = await getLastestCheckins();
-    return response(200, {message: "checkins", lastCheckins});
+    const latestCheckins = await getLastestCheckins();
+    return response(200, {message: "checkins", latestCheckins});
   }
   catch (e) {
     console.log("exception getting checkin data", e);
@@ -57,17 +58,17 @@ async function getCheckin(id: string): Promise<Record<string, AttributeValue>> {
 }
 
 async function getLastestCheckins(): Promise<Record<string, any>> {
-  const lastCheckins = {};
+  const latestCheckins = {};
   for (const key in patientIds) {
     const id = patientIds[key]
     const data = await getCheckin(id);
     if (! data) {
-      lastCheckins[id] = "Never"
+      latestCheckins[id] = "Never"
     } else {
-      lastCheckins[id] = new Date(data["checkinTime"]["S"]!).toUTCString();
+      latestCheckins[id] = new Date(data["checkinTime"]["S"]!).toUTCString();
     }
   }
-  return lastCheckins;
+  return latestCheckins;
 }
 
 async function describeTable(tableName) {

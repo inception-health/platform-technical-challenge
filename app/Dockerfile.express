@@ -1,0 +1,11 @@
+FROM node:16 as builder
+WORKDIR /usr/src/app
+COPY package.json ./
+RUN npm install
+COPY *.ts ./
+RUN npm run build-express
+    
+FROM node:16
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/dist/* ./
+CMD [ "node", "express.js" ]
