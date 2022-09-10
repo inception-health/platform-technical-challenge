@@ -30,7 +30,10 @@ export class ExampleCdkStack extends cdk.Stack {
     });
 
     const backend = new lambda.DockerImageFunction(this, 'challenge-backend-handler', {
-      code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../app')),
+      code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../app'), {
+        cmd: ["index.backend"],
+        file: "Dockerfile.lambda",
+      }),
       environment: {
         "DYNAMO_TABLE_NAME": table.tableName,
       },
@@ -65,7 +68,8 @@ export class ExampleCdkStack extends cdk.Stack {
 
     const checkinHandler = new lambda.DockerImageFunction(this, 'challenge-checkin-handler', {
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../app'), {
-        cmd: ['index.checkin'],
+        cmd: ["index.checkin"],
+        file: "Dockerfile.lambda"
       }),
       environment: {
         "DYNAMO_TABLE_NAME": table.tableName,

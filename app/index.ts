@@ -31,6 +31,7 @@ export const backend = async (): Promise<APIGatewayProxyResult> => {
   try {
     await describeTable(TABLE_NAME);
   } catch (e) {
+    console.log("!!!!", e);
     return response(500, {error: `Failed to describe Dynamodb table. Looked for '${TABLE_NAME}'.`, details: e})
   }
 

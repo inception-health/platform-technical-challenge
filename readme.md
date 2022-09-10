@@ -4,17 +4,58 @@
 
 ### Application
 
-There is an application in the `app/` folder in the root of this repository. It defines two lambda handlers in `index.ts`. 
+There is an application in the `app/` folder in the root of this repository. It exports two functions, `checkin` and `backend` from `index.ts`. `checkin` creates a record in dynamodb that represents a patient checking in. `backend` reads the records in dynamodb and returns a JSON encoded message representing the latest checkin time for the known patients.
 
-The first is `checkin` which "checks in" a random patient whenever it is invoked. It requires write access to a dynamodb table. The tablename should be defined in the environment variable `DYNAMO_TABLE_NAME`.
+These functions can be invoked directly from lambda but there is also an express implementation in `express.ts`.
 
-The second is `backend` which generates an http response carrying JSON encoded data representing the last checkin time for each patient. It requires read and describe access to the same dynamodb table used by `checkin`. The tablename should be defined in the environment variable `DYNAMO_TABLE_NAME`.
+There are two Dockerfiles. First, `Dockerfile.lambda` is for use with lambdas. Second is `Dockerfile.express` which will startup an express server on port 3000 or the port specified by the environment variable `PORT`.
 
-You should not need to modify this code. The code is expected to be deployed to lambda.
+#### Using the applications
+
+You may want to invoke these functions from a web server directly or you may want to set these functions up as lambda handlers. There are some included dockerfiles to make things easier but you don't have to use them.
+
+##### Lambda Handlers
+
+You can build and run the lambda handlers locally using
+
+```
+cd app/
+docker build -t lambda-handler -f Dockerfile.lambda .
+docker run --rm -d -p 8080:8080 \
+  -e REGION=us-east-1 \
+  -e AWS_PROFILE=sandbox-jake \
+  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
+  -v $HOME/.aws/:/root/.aws/:ro \
+  lambda-handler index.backend
+curl -X POST http://localhost:8080/2015-03-31/functions/function/invocations -H 'Content-Type: application/json' -d '"{}"' | python3 -m json.tool
+```
+
+##### Express Webserver
+
+You can build and run the express webserver locally using
+
+```
+cd app/
+docker build -t express-app -f Dockerfile.express .
+docker run --rm -d -p 3000:3000 \
+  -e REGION=us-east-1 \
+  -e AWS_PROFILE=sandbox-jake \
+  -e DYNAMO_TABLE_NAME=ExampleCdkStack-challengedynamotableD8B7A7F0-JOGVCB23S70N \
+  -e PORT=3000 \
+  -v $HOME/.aws/:/root/.aws/:ro \
+  express-app
+```
+
+# 
+The first is `checkin` which "checks in" a random patient whenever it is invoked. It requires write access to a dynamodb table. The tablename should be defined in the environment variable `DYNAMO_TABLE_NAME`. When invoking this lambda handler be sure to set the handler to `index.checkin`. In the express implementation you can send a `POST` request to `/checkin`.
+
+The second is `backend` which generates an http response carrying JSON encoded data representing the last checkin time for each patient. It requires read and describe access to the same dynamodb table used by `checkin`. The tablename should be defined in the environment variable `DYNAMO_TABLE_NAME`. When invoking this lambda handler be sure to set the handler to `index.backend`. In the express implementation you cand a `GET` request to `/`.
+
+You should not need to modify this code. You may use either the lambda or express based version of the app or some combination of the two.
 
 ### AWS
 
-Your AWS credentials give you admin access to a sandbox account. You may use any resources you find appropriate.
+Your AWS credentials give you admin access to a sandbox account. You may use any resources you find appropriate. We prefer that you not use EC2 for your solution.
 
 You have access to an existing hosted zone in route53. The zone id is `Z07252961CXXYMJEGGB16` and the zone name is `jake-sandbox.ihengine.com`. Please do not buy and register a new domain.
 

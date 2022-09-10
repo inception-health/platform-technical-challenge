@@ -12,7 +12,7 @@ app.get( "/", async ( req, res ) => {
   res.json(data);
 });
 
-app.get( "/checkin", ( req, res ) => {
+app.post( "/checkin", ( req, res ) => {
   checkin();
   res.json({message: "Successfully checked in a patient."});
 });
