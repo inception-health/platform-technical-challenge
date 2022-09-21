@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "esbuild index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
-    "build-express": "esbuild express.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/express.js",
+    "build-express": "esbuild index.ts express.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outdir=dist/",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "keywords": [],
